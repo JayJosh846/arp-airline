@@ -1,0 +1,318 @@
+scalar Date
+
+type Query {
+  info: String!
+  
+  allPassengers: [Airline!]!
+  
+  allAirlineAdmins: [Airline!]!
+  
+  allAeropayeAdmins: [Airline!]!
+  
+  getAirlineById(id: ID!): Airline
+  
+  verifyEmailToken(id: ID!): Boolean!
+  
+  getAirlineFlights: [Flight!]!
+
+  getBookedFlight(flightCode: String!): [Booked!]!
+
+  balance: BalanceOf
+
+  airlineClaims(flightCode: String!): AirlineClaims
+
+  cancelAndCheckInCount(flightCode: String!): Flight
+
+  airlineBankDetails: [Airlinesbanklist!]!
+
+  getAllCancellations: [Cancelled!]!
+
+
+  getCancellationsByFlight (flightCode: String!): [Cancelled!]!
+
+  totalAmountRefundedByAirline: Int
+
+    airlinesRefund: [AirlineRefunds]!
+
+
+}
+
+type Mutation {
+  airlineSignup(
+    airlineName: String!
+    email: String!
+    password: String!
+    mobile: String!
+  ): AuthPayload
+  
+  airlineLogin(email: String!, password: String!): AuthPayload
+  
+  sendEmailOTP(email: String!): AuthCode
+  
+  sendTermiiTokenToMobile(msisdn: String!): AuthCodeMobile
+
+  airlineSetRefunds (
+    cancelled: Int!
+    delayed:   Int!
+    booked:    Int!): SetRefunds!
+  
+  verifyMobileWithTermiiToken(msisdn: String!, pin: String!): AuthCodeMobile
+  
+  registerFlight(
+    # flightCode: String!
+    departureCity: String!
+    departureDate: String!
+    departureTime: String!
+    departureInfo: String
+    arrivalCity:   String!
+    arrivalDate: String!
+    arrivalTime: String!
+    arrivalInfo: String
+    airfare: String!
+    class: CLASS!
+  ): FlightPayload
+  
+  updateFlight(
+    status: String!
+    departureDate: String!
+    departureTime: String!
+    departureInfo: String
+    arrivalDate: String!
+    arrivalTime: String!
+    arrivalInfo: String
+    class: CLASS!
+  ): FlightPayload
+  
+  airlineClaimsBooking(flightCode: String!): Bookedpayload
+  flightClaim (flightCode: String!): FlightClaim
+
+    airlineBankDetails (
+    residentCountry: Country
+    acctName:        String!
+    acctBank:        String!
+    acctNumber:      String!
+    acctType:        AccountType
+    acctSwiftCode:   String
+  ) : BankAccount
+
+  setRefundPolicy (
+    num: Int!
+    scheduled: Calendrical!
+    parcentage: Int!
+    ): BankAccount
+}
+
+type AirlineClaims {
+  airlineName:    String
+  status:         String
+  flightCode:     String
+  departureCity:  String
+  departureDate:  String
+  arrivalCity:    String
+  arrivalDate:    String
+
+}
+
+type AuthPayload {
+  token: String
+  airline: Airline
+  smsTokenStatus: String
+  statusMessage: String
+  status: Int
+}
+
+type FlightPayload {
+  flight: Flight!
+}
+
+type SetRefunds {
+  status: String
+  data: Boolean
+}
+
+type BankAccount {
+   status: String,
+   message: String,
+}
+
+type Bookedpayload {
+    bookingClaimResult: Claims!
+}
+
+type Claims {
+  status: String
+  data: Boolean
+}
+
+type AuthCode {
+  OTP: Int!
+  Airline: Airline!
+}
+
+type BalanceOf {
+  status: String,
+  data: BalanceOfResp
+}
+
+type BalanceOfResp {
+  status: String,
+  data: String
+}
+
+type FlightClaim {
+  status: String,
+  message: String
+}
+
+type AuthCodeMobile {
+  pinId: String
+  verified: String
+  msisdn: String
+  status: String
+  pin: String
+}
+
+type Airline {
+  id: ID!
+  airlineName: String!
+  email: String!
+  mobile: String!
+  password: String!
+  emailVerified: Boolean
+  mobileVerified: Boolean
+  enabled2FA: Boolean
+  role: ROLES
+  addr: String
+  createdAt: Date   
+  updatedAt: Date
+}
+
+enum ROLES {
+  PASSENGER
+  AIRLINE
+  ADMIN
+}
+
+type Flight {
+  airlineId: String
+  airlineName: String
+  airlineAddres: String
+  flightCode: String
+  departureCity: String
+  departureDate: String
+  departureTime: String
+  departureInfo: String
+  arrivalCity: String
+  arrivalDate: String
+  arrivalTime: String
+  arrivalInfo: String
+  postedById: Int
+  airfare: String
+  pass: Int
+  cancelled: Int
+  checkedIn: Int
+  flightComplete: Boolean
+  delayed: Int
+  booked: Int
+  totalFee: Int
+  class: CLASS
+  apstatus: String
+  status: String
+  flightEscrow: String
+  createdAt: Date   
+  updatedAt: Date
+}
+
+type Booked {
+  airlineId:     Int
+  airlineName:   String  
+  airlineAddres: String 
+  userFirstName: String
+  userLastName:  String
+  numOfAdults:   Int
+  numOfChildren: Int
+  numOfInfants:  Int
+  flightCode:    String
+  departureCity: String 
+  departureDate: String
+  departureTime: String
+  departureInfo: String
+  arrivalCity:   String
+  arrivalDate:   String
+  arrivalTime:   String
+  arrivalInfo:   String
+  amount:        String
+  pass:          Int
+  totalFee:      Int
+  checkedIn:       Boolean
+  cancelled:     Boolean
+  class:         CLASS
+  apstatus:      String  
+  status:        String  
+  ticketId:    String   
+  flightEscrow:  String
+  createdAt: Date   
+  updatedAt: Date
+}
+
+type Airlinesbanklist {
+  acctResCountry:Country     
+  acctName:      String
+  acctBank:      String    
+  acctNumber:     String       
+  acctType:       AccountType     
+  acctSwiftCode:  String   
+
+}
+
+type Cancelled {
+  airlineId:      Int           
+  status:         String
+  username:       String
+  airlineName:    String
+  userId:         Int
+  flightCode:     String         
+  departureCity:  String
+  departureDate:  String
+  arrivalCity:    String
+  arrivalDate:    String
+  amount:         String
+  amountRefunded: String
+  class:          CLASS
+  ticketId:       String
+  createdAt:      Date 
+}
+
+type AirlineRefunds {
+  airlineId:      Int   
+  airlineName:    String         
+  num:            Int
+  scheduled:      Calendrical
+  parcentage:     Int 
+}
+
+enum CLASS {
+  ECONOMY
+  BUSINESS
+  FIRST_CLASS
+  PREMIUM_ECONOMY
+}
+
+enum AccountType {
+  SAVINGS_ACCOUNT
+  CURRENT_ACCOUNT
+}
+
+enum Country {
+  NIGERIA
+  GHANA
+  USA
+  BRAZIL
+}
+
+enum Calendrical {
+  HOURS
+  DAYS
+  WEEKS
+  MONTHS
+}

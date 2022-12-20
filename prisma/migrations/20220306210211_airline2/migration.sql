@@ -1,0 +1,6 @@
+-- CreateEnum
+CREATE TYPE "Status" AS ENUM ('SCHEDULED', 'DELAYED', 'CANCELLED', 'ACTIVE', 'LANDED');
+
+-- AlterTable
+ALTER TABLE "Flight" ADD COLUMN     "status" "Status" NOT NULL DEFAULT E'SCHEDULED',
+ALTER COLUMN "flightCode" SET DATA TYPE TEXT;

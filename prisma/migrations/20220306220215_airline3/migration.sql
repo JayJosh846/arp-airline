@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Airline" ALTER COLUMN "role" SET DEFAULT E'AIRLINE';

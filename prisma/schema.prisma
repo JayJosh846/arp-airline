@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Airline {
+  id             Int        @id @default(autoincrement())
+  email          String     @unique
+  airlineName    String     @unique
+  password       String
+  mobile         String     @unique
+  emailVerified  Boolean    @default(false)
+  mobileVerified Boolean    @default(false)
+  enabled2FA     Boolean    @default(false)
+  role           Role       @default(AIRLINE)
+  status         Airlinestatus @default(ACTIVE)
+  walletBalance  String?     
+  numOfFlights   Int?        
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  addr           String?
+  apiKey         String?    @unique
+  AuthCode       AuthCode[]
+  flight        Flight[]
+  booked        Booked[]
+  airlineBankList   Airlinesbanklist[]
+  Wallettrans    Wallettransactions[]
+  Airlineclaim   Airlineclaim[]
+  Archivedflight Archivedflight[]
+  Passengercancel Passengercancel[]
+  Airlinerefunds  Airlinerefunds[]
+  // tempflightclaim Tempflightclaim[]
+
+
+  @@unique(fields: [email, mobile], name: "emailMobile")
+  @@unique(fields: [airlineName, addr])
+
+}
+
+model AuthCode {
+  id           Int      @id @default(autoincrement())
+  user         Airline  @relation(fields: [airlineEmail], references: [email])
+  airlineEmail String   @unique
+  OTP          Int      @unique
+  category     Category
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Flight {
+  id            Int      @id @default(autoincrement())
+  airline       Airline  @relation(fields: [airlineId], references: [id])
+  airlineId     Int
+  airlineName   String 
+  airlineAddres String
+  flightCode    String   @unique
+  departureCity  String
+  departureDate String
+  departureTime String
+  departureInfo String?
+  arrivalCity   String
+  arrivalDate   String
+  arrivalTime   String
+  arrivalInfo   String?
+  airfare       String
+  pass          Int?     @default(0)
+  totalFee      Int?     @default(0)
+  cancelled     Int?     @default(0)
+  checkedIn     Int?     @default(0)
+  flightComplete Boolean? @default(false)
+  class         CLASS
+  apstatus      String   @default("0")
+  status        Status   @default(PENDING)
+  flightEscrow  String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  Flightescrow  Flightescrow[]
+}
+
+model Flightescrow {
+  // id            Int      @id @default(autoincrement())
+  flightEsrw    Flight   @relation(fields: [flightEscrow], references: [flightEscrow])
+  flightEscrow  String   @unique
+}
+
+model Booked {
+  id            Int      @id @default(autoincrement())
+  airline       Airline  @relation(fields: [airlineId], references: [id])
+  airlineId     Int
+  airlineName   String  
+  airlineAddres String
+  userId        Int 
+  userFirstName String
+  userLastName  String
+  email         String
+  numOfAdults   Int
+  numOfChildren Int      @default(0)
+  numOfInfants  Int      @default(0)
+  flightCode    String
+  departureCity  String
+  departureDate String
+  departureTime String
+  departureInfo String?
+  arrivalCity   String
+  arrivalDate   String
+  arrivalTime   String
+  arrivalInfo   String?
+  amount        String
+  pass          Int?     @default(0)
+  totalFee      Int?     @default(0)
+  cancelled     Boolean?  @default(false)
+  checkedIn     Boolean?  @default(false)
+  class         CLASS    @default(ECONOMY)
+  apstatus      String  
+  status        Status  
+  ticketId    String      @unique
+  flightEscrow  String   
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Airlinesbanklist {
+  id             Int           @id @default(autoincrement())
+  airline        Airline       @relation(fields: [airlineId], references: [id])
+  airlineId      Int       
+  acctResCountry Country      @default(NIGERIA)
+  acctName       String?
+  acctBank       String?    
+  acctNumber     String?      @unique 
+  acctType       AccountType  @default(SAVINGS_ACCOUNT)    
+  acctSwiftCode  String? 
+
+}
+
+model Wallettransactions {
+  id            Int      @id @default(autoincrement())
+  airline       Airline  @relation(fields: [airlineId], references: [id])
+  airlineId     Int       
+  from          String?
+  fromAddr      String?
+  receiverName  String?
+  receiverAddr  String?
+  amount        Int
+  description   String
+  trxRef        String?   @unique
+  trxType       String
+  status        String   @default("pending")
+  createdAt     DateTime      @default(now())
+}
+
+model Airlineclaim {
+  id            Int      @id @default(autoincrement())
+  airline       Airline          @relation(fields: [airlineId], references: [id])
+  airlineId         Int           
+  airlineName    String
+  status         String
+  flightCode     String
+  departureCity  String
+  departureDate  String
+  arrivalCity    String
+  arrivalDate    String
+  createdAt      DateTime      @default(now())          
+}
+
+
+model Archivedflight {
+  id            Int      @id @default(autoincrement())
+  airline       Airline  @relation(fields: [airlineId], references: [id])
+  airlineId     Int
+  airlineName   String 
+  airlineAddres String
+  flightCode    String   @unique
+  departureCity  String
+  departureDate String
+  departureTime String
+  departureInfo String?
+  arrivalCity   String
+  arrivalDate   String
+  arrivalTime   String
+  arrivalInfo   String?
+  airfare       String
+  pass          Int?     @default(0)
+  totalFee      Int?     @default(0)
+  cancelled     Int?     @default(0)
+  checkedIn     Int?     @default(0)
+  flightComplete Boolean? @default(false)
+  class         CLASS
+  apstatus      String   @default("0")
+  status        Status   @default(PENDING)
+  flightEscrow  String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+}
+
+model Passengercancel {
+  id             Int           @id @default(autoincrement())
+  airline        Airline       @relation(fields: [airlineId], references: [id])
+  airlineId      Int           
+  status         String
+  username       String
+  airlineName    String
+  userId         Int?
+  flightCode     String         
+  departureCity  String
+  departureDate  String
+  arrivalCity    String
+  arrivalDate    String
+  amount         String?
+  amountRefunded String?
+  class          CLASS?        @default(ECONOMY)
+  ticketId       String        @unique
+  createdAt      DateTime      @default(now())           
+}
+
+model Airlinerefunds {
+  id             Int           @id @default(autoincrement())
+  airline        Airline       @relation(fields: [airlineId], references: [id])
+  airlineId      Int   
+  airlineName    String        
+  num            Int
+  scheduled      Calendrical
+  parcentage     Int 
+}
+
+// model Tempflightclaim {
+//   id             Int           @id @default(autoincrement())
+//   user           Airline         @relation(fields: [airlineId], references: [id])
+//   airlineId      Int           @unique
+//   flightCode     String        @unique
+//   status         String
+// }
+
+enum Calendrical {
+  HOURS
+  DAYS
+  WEEKS
+  MONTHS
+}
+
+enum Airlinestatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum Role {
+  PASSENGER
+  AIRLINE
+  ADMIN
+}
+
+enum CLASS {
+  ECONOMY
+  BUSINESS
+  FIRST_CLASS
+  PREMIUM_ECONOMY
+}
+
+enum Category {
+  VERIFICATION
+  FA
+}
+
+enum Status {
+  PENDING
+  DELAYED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum AccountType {
+  SAVINGS_ACCOUNT
+  CURRENT_ACCOUNT
+}
+
+enum Country {
+  NIGERIA
+  GHANA
+  USA
+  BRAZIL
+}
+
+// model Passenger {
+//   id           Int      @id @default(autoincrement())
+//   firstName    String
+//   middleName   String
+//   lastName     String
+//   DOB          DateTime
+//   email        String
+//   mobile       String
+//   organisation String
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   Flight       Flight[]
+// }
+
+// enum Status {
+//   SCHEDULED
+//   DELAYED
+//   CANCELLED
+//   ACTIVE
+//   LANDED
+// }
